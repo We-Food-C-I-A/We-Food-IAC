@@ -26,3 +26,18 @@ variable "region_name" {
 variable "terraform_name" {
   default = "wefood"
 }
+
+# 네트워크 환경 설정에 사용되는 cidr block 설정
+variable "cidr_block" {
+  type = string
+}
+
+# bastion 서버에 접속하기 위해 사용되는 IP 주소
+variable "remote_ip" {
+  type = string
+}
+
+# AWS EC2 인스턴스에 SSH 접속을 위해 사용되는 키 쌍
+variable "keypair" {
+  type = string
+}
