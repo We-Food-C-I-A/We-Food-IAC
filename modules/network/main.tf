@@ -211,6 +211,6 @@ resource "aws_instance" "bastion" {
   key_name                    = var.keypair
 
   tags = {
-    Name = "${var.region_name}-${var.terraform_name}--bastion"
+    Name = "${var.region_name}-${var.terraform_name}-bastion"
   }
 }
