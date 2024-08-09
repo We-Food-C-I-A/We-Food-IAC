@@ -41,3 +41,13 @@ variable "remote_ip" {
 variable "keypair" {
   type = string
 }
+
+# RDS에 접근하기 위한 username
+variable "db_username" {
+  type = string
+}
+
+# RDS에 접근하기 위한 password
+variable "db_password" {
+  type = string
+}

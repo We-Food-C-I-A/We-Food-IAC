@@ -64,7 +64,7 @@ resource "aws_subnet" "app" {
 }
 
 # data subnet 정의(rds, elasticcache 등이 이에 속함)
-resource "aws_subnet" "data" {
+resource "aws_subnet" "data1" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = cidrsubnet(var.cidr_block, 8, 2)
   availability_zone = "ap-northeast-2a"
@@ -74,34 +74,45 @@ resource "aws_subnet" "data" {
   }
 }
 
-# net subnet에서 사용되는 route_table 정의
-resource "aws_route_table" "net" {
-  vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
+# data subnet 정의(rds, elasticcache 등이 이에 속함)
+resource "aws_subnet" "data2" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = cidrsubnet(var.cidr_block, 8, 4)
+  availability_zone = "ap-northeast-2b"
 
   tags = {
-    Name = "${var.region_name}-${var.terraform_name}-net-rtb"
+    Name = "${var.region_name}-${var.terraform_name}-data-private"
   }
 }
+
+# net subnet에서 사용되는 route_table 정의
+# resource "aws_route_table" "net" {
+#   vpc_id = aws_vpc.vpc.id
+
+#   route {
+#     cidr_block = "0.0.0.0/0"
+#     gateway_id = aws_internet_gateway.igw.id
+#   }
+
+#   tags = {
+#     Name = "${var.region_name}-${var.terraform_name}-net-rtb"
+#   }
+# }
 
 # net subnet과 route_table을 연결
-resource "aws_route_table_association" "net" {
-  subnet_id      = aws_subnet.net.id
-  route_table_id = aws_route_table.net.id
-}
+# resource "aws_route_table_association" "net" {
+#   subnet_id      = aws_subnet.net.id
+#   route_table_id = aws_route_table.net.id
+# }
 
 # app subnet에서 사용되는 route_table 정의
-resource "aws_route_table" "app" {
-  vpc_id = aws_vpc.vpc.id
+# resource "aws_route_table" "app" {
+#   vpc_id = aws_vpc.vpc.id
 
-  tags = {
-    Name = "${var.region_name}-${var.terraform_name}-app-rtb"
-  }
-}
+#   tags = {
+#     Name = "${var.region_name}-${var.terraform_name}-app-rtb"
+#   }
+# }
 
 # resource "aws_route" "outbound_nat_route" {
 #   route_table_id         = aws_route_table.app.id
@@ -110,10 +121,10 @@ resource "aws_route_table" "app" {
 # }
 
 # app subnet과 route_table을 연결
-resource "aws_route_table_association" "app" {
-  subnet_id      = aws_subnet.app.id
-  route_table_id = aws_route_table.app.id
-}
+# resource "aws_route_table_association" "app" {
+#   subnet_id      = aws_subnet.app.id
+#   route_table_id = aws_route_table.app.id
+# }
 
 # bastion 서버의 security-group 정의
 resource "aws_security_group" "bastion_sg" {
