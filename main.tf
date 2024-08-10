@@ -27,3 +27,9 @@ module "rdb" {
   db_password    = var.db_password
   remote_ip      = var.remote_ip
 }
+
+# S3 구축
+module "storage" {
+  source = "./modules/storage"
+  domain = var.domain
+}

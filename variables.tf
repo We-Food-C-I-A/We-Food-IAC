@@ -51,3 +51,8 @@ variable "db_username" {
 variable "db_password" {
   type = string
 }
+
+# 도메인
+variable "domain" {
+  type = string
+}
