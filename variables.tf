@@ -42,6 +42,16 @@ variable "keypair" {
   type = string
 }
 
+# RDS에 접근하기 위한 port
+variable "db_port" {
+  type = number
+}
+
+# RDS에 접근하기 위한 database name
+variable "db_name" {
+  type = string
+}
+
 # RDS에 접근하기 위한 username
 variable "db_username" {
   type = string

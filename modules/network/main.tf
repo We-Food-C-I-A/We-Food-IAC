@@ -86,24 +86,24 @@ resource "aws_subnet" "data2" {
 }
 
 # net subnet에서 사용되는 route_table 정의
-# resource "aws_route_table" "net" {
-#   vpc_id = aws_vpc.vpc.id
+resource "aws_route_table" "net" {
+  vpc_id = aws_vpc.vpc.id
 
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.igw.id
-#   }
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
 
-#   tags = {
-#     Name = "${var.region_name}-${var.terraform_name}-net-rtb"
-#   }
-# }
+  tags = {
+    Name = "${var.region_name}-${var.terraform_name}-net-rtb"
+  }
+}
 
 # net subnet과 route_table을 연결
-# resource "aws_route_table_association" "net" {
-#   subnet_id      = aws_subnet.net.id
-#   route_table_id = aws_route_table.net.id
-# }
+resource "aws_route_table_association" "net" {
+  subnet_id      = aws_subnet.net.id
+  route_table_id = aws_route_table.net.id
+}
 
 # app subnet에서 사용되는 route_table 정의
 # resource "aws_route_table" "app" {
@@ -176,14 +176,14 @@ resource "aws_security_group_rule" "ovpn" {
 }
 
 # bastion 서버에서 net 서브넷에서 오는 접근 허용
-resource "aws_security_group_rule" "vpc_inbound" {
-  type              = "ingress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = [cidrsubnet(var.cidr_block, 8, 0)]
-  security_group_id = aws_security_group.bastion_sg.id
-}
+# resource "aws_security_group_rule" "vpc_inbound" {
+#   type              = "ingress"
+#   from_port         = 0
+#   to_port           = 0
+#   protocol          = "-1"
+#   cidr_blocks       = [cidrsubnet(var.cidr_block, 8, 0)]
+#   security_group_id = aws_security_group.bastion_sg.id
+# }
 
 # bastion 서버의 모든 outbound 허용
 resource "aws_security_group_rule" "bastion_outbound" {
