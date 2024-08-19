@@ -13,7 +13,7 @@ resource "aws_security_group_rule" "bastion_inbound_ssh" {
   from_port         = 3306
   to_port           = 3306
   protocol          = "tcp"
-  cidr_blocks       = [var.remote_ip]
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.rds_sg.id
 }
 

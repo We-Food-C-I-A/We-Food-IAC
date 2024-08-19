@@ -25,11 +25,23 @@ module "rdb" {
   terraform_name = var.terraform_name
   db_username    = var.db_username
   db_password    = var.db_password
-  remote_ip      = var.remote_ip
+  app_cidr_block = module.network.net_cidr_block
 }
 
 # S3 구축
 module "storage" {
   source = "./modules/storage"
   domain = var.domain
+}
+
+# Parameter Store 구축
+module "parameter" {
+  source         = "./modules/parameter"
+  region_name    = var.region_name
+  terraform_name = var.terraform_name
+  db_host        = module.rdb.db_host
+  db_port        = var.db_port
+  db_name        = var.db_name
+  db_username    = var.db_username
+  db_password    = var.db_password
 }

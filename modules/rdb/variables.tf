@@ -23,8 +23,8 @@ variable "db_password" {
   type = string
 }
 
-# bastion에 접근 가능한 ip
-variable "remote_ip" {
+# rdb에 접근 가능한 ip
+variable "app_cidr_block" {
   type = string
 }
 
