@@ -8,6 +8,16 @@ variable "terraform_name" {
   type = string
 }
 
+# AWS IAM Access Key
+variable "access_key" {
+  type = string
+}
+
+# AWS IAM Secret Key
+variable "secret_key" {
+  type = string
+}
+
 # 데이터베이스 호스트
 variable "db_host" {
   type = string

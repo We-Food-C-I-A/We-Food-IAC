@@ -39,6 +39,8 @@ module "parameter" {
   source         = "./modules/parameter"
   region_name    = var.region_name
   terraform_name = var.terraform_name
+  access_key     = var.access_key
+  secret_key     = var.secret_key
   db_host        = module.rdb.db_host
   db_port        = var.db_port
   db_name        = var.db_name
