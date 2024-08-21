@@ -225,3 +225,177 @@ resource "aws_instance" "bastion" {
     Name = "${var.region_name}-${var.terraform_name}-bastion"
   }
 }
+
+# 호스팅 영역 리소스 - 운영 환경
+resource "aws_route53_zone" "zone_prod" {
+  name = var.domain
+}
+
+# 운영 환경 도메인 인증서 생성
+resource "aws_acm_certificate" "cert_prod_by_seoul" {
+  domain_name       = "*.${var.domain}"
+  validation_method = "DNS"
+
+  subject_alternative_names = [
+    "*.${var.domain}",
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# 운영 환경 도메인 인증서 생성
+resource "aws_acm_certificate" "cert_prod" {
+  provider          = aws.us_east_1
+  domain_name       = "*.${var.domain}"
+  validation_method = "DNS"
+
+  subject_alternative_names = [
+    "*.${var.domain}",
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# 개발 환경에서 HTTP 및 HTTPS 트래픽을 컨트롤하기 위한 ALB 생성
+resource "aws_lb" "alb" {
+  name               = "${var.terraform_name}-alb"
+  load_balancer_type = "application"
+  internal           = false
+  security_groups = [
+    aws_vpc.vpc.default_security_group_id,
+    aws_security_group.bastion_sg.id
+  ]
+  subnets = [
+    aws_subnet.net.id,
+    aws_subnet.net2.id
+  ]
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+      host        = "#{host}"
+      path        = "/#{path}"
+      query       = "#{query}"
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = aws_acm_certificate.cert_prod_by_seoul.arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_target_group.arn
+  }
+}
+
+# 운영 환경 인증서 추가
+resource "aws_lb_listener_certificate" "https_cert_prod" {
+  listener_arn    = aws_lb_listener.https.arn
+  certificate_arn = aws_acm_certificate.cert_prod_by_seoul.arn
+}
+
+resource "aws_lb_target_group" "alb_target_group" {
+  name        = "bastion"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc.id
+  target_type = "instance"
+
+  health_check {
+    enabled             = true
+    interval            = 300
+    path                = "/index.html"
+    port                = "traffic-port"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 5
+    protocol            = "HTTP"
+    matcher             = "200-399"
+  }
+}
+
+resource "aws_lb_target_group_attachment" "bastion" {
+  target_group_arn = aws_lb_target_group.alb_target_group.arn
+  target_id        = aws_instance.bastion.id
+  port             = 80
+}
+
+# 운영 도메인 및 하위 도메인의 DNS 레코드 생성
+resource "aws_route53_record" "validation_prod" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert_prod.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      type   = dvo.resource_record_type
+      record = dvo.resource_record_value
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = aws_route53_zone.zone_prod.zone_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# 운영 환경 - bastion 호스트 연결
+resource "aws_route53_record" "prod_to_bastion" {
+  zone_id = aws_route53_zone.zone_prod.zone_id
+  name    = "*.${var.domain}"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.alb.dns_name
+    zone_id                = aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
+}
+
+# 운영 도메인 인증서 검증
+resource "aws_acm_certificate_validation" "validation_prod" {
+  provider                = aws.us_east_1
+  certificate_arn         = aws_acm_certificate.cert_prod.arn
+  validation_record_fqdns = [for record in aws_route53_record.validation_prod : record.fqdn]
+}
+
+# 개발 환경 - CDN 연결
+resource "aws_route53_record" "cdn" {
+  zone_id = aws_route53_zone.zone_prod.zone_id
+  name    = "cdn.${var.domain}"
+  type    = "A"
+
+  alias {
+    name                   = var.cdn_domain_name
+    zone_id                = var.cdn_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# cdn을 위한 provider 정의
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}

@@ -22,3 +22,18 @@ variable "keypair" {
 variable "remote_ip" {
   type = string
 }
+
+# 서비스 도메인
+variable "domain" {
+  type = string
+}
+
+# CDN의 domain_name
+variable "cdn_domain_name" {
+  type = string
+}
+
+# CDN의 zone_id
+variable "cdn_zone_id" {
+  type = string
+}

@@ -17,3 +17,7 @@ output "db_subnet_id2" {
 output "net_cidr_block" {
   value = aws_subnet.net.cidr_block
 }
+
+output "certificate_validation_completion" {
+  value = aws_acm_certificate_validation.validation_prod.certificate_arn
+}

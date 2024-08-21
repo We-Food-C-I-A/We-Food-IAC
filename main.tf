@@ -7,12 +7,15 @@ provider "aws" {
 
 # VPC, Subnet 등 네트워크 환경 구축
 module "network" {
-  source         = "./modules/network"
-  cidr_block     = var.cidr_block
-  region_name    = var.region_name
-  terraform_name = var.terraform_name
-  keypair        = var.keypair
-  remote_ip      = var.remote_ip
+  source          = "./modules/network"
+  cidr_block      = var.cidr_block
+  region_name     = var.region_name
+  terraform_name  = var.terraform_name
+  keypair         = var.keypair
+  remote_ip       = var.remote_ip
+  domain          = var.domain
+  cdn_domain_name = module.storage.cdn_domain_name
+  cdn_zone_id     = module.storage.cdn_zone_id
 }
 
 # RDS 구축
@@ -30,8 +33,10 @@ module "rdb" {
 
 # S3 구축
 module "storage" {
-  source = "./modules/storage"
-  domain = var.domain
+  source                            = "./modules/storage"
+  domain                            = var.domain
+  certificate_arn                   = module.network.certificate_validation_completion
+  certificate_validation_completion = module.network.certificate_validation_completion
 }
 
 # Parameter Store 구축
