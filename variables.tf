@@ -66,3 +66,28 @@ variable "db_password" {
 variable "domain" {
   type = string
 }
+
+# 마켓 아이디
+variable "market_id" {
+  type = string
+}
+
+# 마켓 키
+variable "market_key" {
+  type = string
+}
+
+# GPT API 키
+variable "gpt_api_key" {
+  type = string
+}
+
+# 프론트 포트
+variable "front_port" {
+  type = string
+}
+
+# 백엔드 주소
+variable "back_address" {
+  type = string
+}
