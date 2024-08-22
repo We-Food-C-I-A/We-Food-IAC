@@ -51,4 +51,9 @@ module "parameter" {
   db_name        = var.db_name
   db_username    = var.db_username
   db_password    = var.db_password
+  market_id      = var.market_id
+  market_key     = var.market_key
+  gpt_api_key    = var.gpt_api_key
+  front_port     = var.front_port
+  back_address   = var.back_address
 }
