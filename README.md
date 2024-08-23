@@ -4,7 +4,7 @@ We-Food 프로젝트의 Infrastructure as Code (IAC) 리포지토리입니다.
 
 ## Architecture
 
-![We-Food Architecture](https://gist.github.com/user-attachments/assets/8144e781-6468-40c7-bf8e-013e6c579a15)
+![We-Food Architecture](architecture.png)
 
 ## 리소스 설명
 
